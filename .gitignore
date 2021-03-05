@@ -1,0 +1,6 @@
+.git
+.idea
+./schedule-api/node-modules
+./schedule-api/.idea/
+./schedule-vue/node-modules
+./schedule-vue/.idea/
