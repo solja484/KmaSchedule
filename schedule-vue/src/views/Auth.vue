@@ -1,16 +1,14 @@
 <template>
-   <Login></Login>
+  <Login></Login>
 </template>
 
 <script>
-    import Login from "../components/Basic/Login";
+import Login from "../components/Basic/Login";
 
-    export default {
-        name: "Auth",
-        components: {Login},
-    }
+export default {
+  name: "Auth",
+  components: { Login }
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

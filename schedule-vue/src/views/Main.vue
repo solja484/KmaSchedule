@@ -1,21 +1,20 @@
 <template>
-    <div class="home">
-        <img alt="Vue logo" src="../assets/logo.png"/>
+  <div>
+    <Header></Header>
+    <Breadcrumbs></Breadcrumbs>
+    <div class="mx-5">
+      KMA Schedule main page
     </div>
+  </div>
 </template>
 
 <script>
-
-    /*
-    async function createUser() {
-      const response = await fetch(`/api/faculty`, {
-        method: 'GET',
-        headers: {'Content-Type': 'application/json'}
-      });
-      return await response.json();
-    }*/
-
-    export default {
-        name: "Home"
-    };
+import Header from "../components/Basic/Header";
+import Breadcrumbs from "../components/Basic/Breadcrumbs";
+export default {
+  name: "Main",
+  components: { Header, Breadcrumbs }
+};
 </script>
+
+<style scoped></style>

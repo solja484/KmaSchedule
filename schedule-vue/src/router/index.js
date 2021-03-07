@@ -7,41 +7,46 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
-    name: "Schedules",
+    name: "Main",
     component: Main
   },
   {
-    path: "/create",
-    name: "Create",
+    path: "/schedules",
+    name: "Schedules",
+    component: () => import("../views/Schedules.vue")
+  },
+  {
+    path: "/schedules/create",
+    name: "Create schedule",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import("../views/Create.vue")
+    component: () => import("../views/Create.vue")
   },
   {
-    path: "/edit/:code",
+    path: "/schedules/new",
+    name: "New schedule",
+    component: () => import("../views/New.vue")
+  },
+  {
+    path: "/schedules/edit/:code",
     name: "Edit schedule",
-    component: () =>
-        import( "../views/Edit.vue")
+    component: () => import("../views/Edit.vue")
   },
   {
-    path: "/view/:code",
+    path: "/schedules/view/:code",
     name: "View schedule",
-    component: () =>
-        import( "../views/View.vue")
+    component: () => import("../views/View.vue")
   },
   {
     path: "/student/:code",
     name: "Student schedule",
-    component: () =>
-        import( "../views/Student.vue")
+    component: () => import("../views/Student.vue")
   },
   {
     path: "/login",
     name: "Login",
-    component: () =>
-        import( "../views/Auth.vue")
+    component: () => import("../views/Auth.vue")
   }
 ];
 
