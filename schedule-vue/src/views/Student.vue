@@ -12,6 +12,7 @@
     </div>
     <Title message="Розклад" additional="" class="text-center"></Title>
     <StudentSchedule></StudentSchedule>
+
     <Footer></Footer>
   </div>
 </template>

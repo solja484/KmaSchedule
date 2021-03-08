@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer d-flex justify-content-between px-5 py-4 mt-4 ">
+  <footer class="navbar bottom footer d-flex justify-content-between px-5 py-4 mt-4 ">
     <span class="text-black"
       ><a href="https://www.ukma.edu.ua/"
         >National University of Kyiv-Mohyla Academy</a
@@ -23,6 +23,7 @@ export default {
 
 .footer {
   background: $gray-fill;
+  width: 100%;
 }
 
 .footer a {

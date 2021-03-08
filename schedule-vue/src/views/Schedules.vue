@@ -1,9 +1,11 @@
 <template>
   <div v-if="userRole != guest">
     <Header></Header>
+    <div >
     <Breadcrumbs></Breadcrumbs>
     <MetodistList v-if="userRole == metodist"></MetodistList>
     <StudentList v-else></StudentList>
+    </div>
     <Footer></Footer>
   </div>
 </template>
