@@ -44,7 +44,7 @@ export default {
           this.$router.push("/" + userRole + "/" + user.code);
           this.$store.dispatch(
             "changeCurrentState",
-            CurrentState.STUDENT_PROFILE
+            CurrentState.USER_PROFILE
           );
         })
         .catch(err => console.log(err));

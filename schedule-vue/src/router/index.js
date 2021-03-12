@@ -25,23 +25,27 @@ const routes = [
   },
   {
     path: "/schedules/new",
-    name: "New schedule",
+    name: "New",
     component: () => import("../views/New.vue")
   },
   {
     path: "/schedules/edit/:code",
-    name: "Edit schedule",
+    name: "Edit",
     component: () => import("../views/Edit.vue")
   },
   {
     path: "/schedules/view/:code",
-    name: "View schedule",
+    name: "ViewPage",
     component: () => import("../views/View.vue")
   },
   {
     path: "/student/:code",
     name: "Student schedule",
-    component: () => import("../views/Student.vue")
+    component: () => import("../views/Profile.vue")
+  },{
+    path: "/methodist/:code",
+    name: "Methodist schedule",
+    component: () => import("../views/Profile.vue")
   },
   {
     path: "/login",

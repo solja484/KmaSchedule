@@ -1,33 +1,21 @@
 <template>
-  <div v-if="userRole != guest">
+  <div>
     <Header></Header>
-    <div >
-    <Breadcrumbs></Breadcrumbs>
-    <MetodistList v-if="userRole == metodist"></MetodistList>
-    <StudentList v-else></StudentList>
+    <div>
+      <Breadcrumbs type="ALL"></Breadcrumbs>
+      <SchedulesList></SchedulesList>
     </div>
     <Footer></Footer>
   </div>
 </template>
 
 <script>
-import { Role } from "../models/entities/Role";
 import Header from "../components/Basic/Header";
 import Footer from "../components/Basic/Footer";
 import Breadcrumbs from "../components/Basic/Breadcrumbs";
-import StudentList from "../components/Basic/StudentList";
-import MetodistList from "../components/Basic/MetodistList";
+import SchedulesList from "../components/Basic/SchedulesList";
 export default {
-  name: "Main",
-  components: { MetodistList, StudentList, Breadcrumbs, Header, Footer },
-  data() {
-    return {
-      state: this.$store.getters["currentState"],
-      userRole: this.$store.getters["role"],
-      student: Role.STUDENT,
-      metodist: Role.METODIST,
-      guest: Role.GUEST
-    };
-  }
+  name: "Schedules",
+  components: {SchedulesList, Breadcrumbs, Header, Footer }
 };
 </script>

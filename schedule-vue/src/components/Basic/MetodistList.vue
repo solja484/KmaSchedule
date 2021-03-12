@@ -1,30 +1,29 @@
 <template>
-  <div>
+  <div class="mx-5">
+    <br>
     <button
       @click="newSchedule()"
-      class="btn btn-light mx-5 add-schedule-button"
-    >
+      class="btn btn-light mx-5 add-schedule-button">
       <b-icon-plus class="bigger"></b-icon-plus>
       Додати розклад
     </button>
     <Title message="Розклади за спеціальністю" additional=""></Title>
-    <ScheduleBlock type="speciality"></ScheduleBlock>
+
     <Title message="Розклади за кафедрами" additional=""></Title>
-    <ScheduleBlock type="subfaculty"></ScheduleBlock>
+
     <Title message="Розклади сесії" additional=""></Title>
-    <ScheduleBlock type="session"></ScheduleBlock>
+
   </div>
 </template>
 
 <script>
 import Title from "../Nested/Title";
-import ScheduleBlock from "../Nested/ScheduleBlock";
 import { CurrentState } from "../../models/entities/CurrentState";
 import { BIconPlus } from "bootstrap-vue";
 
 export default {
   name: "MetodistList",
-  components: { Title, ScheduleBlock, BIconPlus },
+  components: { Title, BIconPlus },
   methods: {
     newSchedule: function() {
       this.$store

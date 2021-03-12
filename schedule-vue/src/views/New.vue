@@ -1,9 +1,9 @@
 <template>
   <div>
     <Header></Header>
-    <Breadcrumbs ></Breadcrumbs>
+    <Breadcrumbs type="CREATE"></Breadcrumbs>
     <NewSchedule></NewSchedule>
-  <Footer></Footer>
+    <Footer></Footer>
   </div>
 </template>
 
@@ -14,7 +14,7 @@ import NewSchedule from "../components/Basic/NewSchedule";
 import Breadcrumbs from "../components/Basic/Breadcrumbs";
 export default {
   name: "New",
-  components: {Breadcrumbs, Footer, Header,NewSchedule}
+  components: { Breadcrumbs, Footer, Header, NewSchedule }
 };
 </script>
 

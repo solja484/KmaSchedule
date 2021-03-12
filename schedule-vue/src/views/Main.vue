@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header></Header>
-    <Breadcrumbs></Breadcrumbs>
+    <Breadcrumbs type="MAIN"></Breadcrumbs>
     <div class="mx-5">
       KMA Schedule main page
     </div>

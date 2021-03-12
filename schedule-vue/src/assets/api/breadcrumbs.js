@@ -1,4 +1,4 @@
-import { CurrentState } from "../models/entities/CurrentState";
+import { CurrentState } from "../../models/entities/CurrentState";
 
 export const breadcrumbs = {
   MAIN: [

@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import ScheduleCell from "../Nested/ScheduleCell";
+import ScheduleCell from "./ScheduleCell";
 import CourseDetails from "../Nested/CourseDetails";
 export default {
   name: "StudentSchedule",

@@ -1,5 +1,5 @@
 export const Role = {
   STUDENT: "student",
-  METODIST: "metodist",
+  METHODIST: "methodist",
   GUEST: "guest"
 };

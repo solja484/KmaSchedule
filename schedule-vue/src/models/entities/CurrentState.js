@@ -4,7 +4,7 @@ export const CurrentState = {
   SCHEDULE_EDIT: "edit",
   SCHEDULE_CREATE: "create",
   SCHEDULE_NEW: "new",
-  STUDENT_PROFILE: "profile",
+  USER_PROFILE: "profile",
   AUTH: "auth",
   MAIN: "main",
   IDLE: "idle"

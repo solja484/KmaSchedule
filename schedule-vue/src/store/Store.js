@@ -2,18 +2,16 @@ import Vue from "vue";
 import Vuex, {Store} from "vuex";
 import axios from "axios";
 import {CurrentState} from "../models/entities/CurrentState";
+import {ScheduleType} from "../models/entities/ScheduleType"
 import {Role} from "../models/entities/Role";
-import {breadcrumbs} from "../assets/breadcrumbs";
-import {levels} from "../assets/levels";
+import {breadcrumbs} from "../assets/api/breadcrumbs";
+import {levels, seasons} from "../assets/api/levels";
+import {schedule_types} from "../assets/api/schedule_types";
 
 Vue.use(Vuex);
 
-let user_hardcoded = {
-    code: "204186",
-    name: "Андрусів Соломія Ігорівна",
-    role: "Методист",
-    faculty: "123"
-};
+const currentYear = new Date().getFullYear();
+
 let schedule_hardcoded = [
     {
         pair: 1,
@@ -93,189 +91,275 @@ let schedule_hardcoded = [
         }
     }
 ];
-
+const methodist_hardcoded = {
+    id: 79461,
+    link: 1861,
+    role: 'Методист',
+    code: '100000',
+    name: 'Тестовий методист',
+    methodist: {faculty_id: 123, faculty_name: 'Факультет інформатики'}
+};
+/*const student_hardcoded = {
+    id: 68937,
+    link: 66950,
+    role: 'Студент',
+    code: '204186',
+    name: 'Андрусів Соломія Ігорівна',
+    student: {
+        spec_id: 1472,
+        speciality: 'Інженерія програмного забезпечення',
+        faculty_id: 123,
+        faculty_name: 'Факультет інформатики'
+    }
+};*/
 const store = new Store({
-    state: {
-        auth: true,
-        user: user_hardcoded,
-        role: Role.METODIST,
-        currentState: CurrentState.SCHEDULES_ALL,
-        faculties: [],
-        speciality: [],
-        subfaculty: [],
-        breadcrumbs: breadcrumbs.ALL,
-        days: [],
-        pairs: [],
-        levels: levels,
-        schedule: schedule_hardcoded,
-        createType: null
-    },
-    getters: {
-        role: state => state.role,
-        currentState: state => state.currentState,
-        logState: state => state.logState,
-        user: state => state.user,
-        breadcrumbs: state => state.breadcrumbs,
-        days: state => state.days,
-        pairs: state => state.pairs,
-        schedule: state => state.schedule,
-        faculties: state => state.faculties,
-        subfaculty: state => state.subfaculty,
-        speciality: state => state.speciality,
-        levels: state => state.levels,
-        createType: state => state.createType
-    },
-    actions: {
-        changeCurrentState({commit}, currentState) {
-            commit("setCurrentState", currentState);
-            switch (currentState) {
-                case CurrentState.MAIN:
-                    commit("setBreadcrumbs", breadcrumbs.MAIN);
-                    break;
-                case CurrentState.SCHEDULES_ALL:
-                    commit("setBreadcrumbs", breadcrumbs.ALL);
-                    break;
-                case CurrentState.STUDENT_PROFILE:
-                    commit("setBreadcrumbs", breadcrumbs.PROFILE);
-                    break;
-                case CurrentState.SCHEDULE_CREATE:
-                    commit("setBreadcrumbs", breadcrumbs.CREATE);
-                    break;
-                case CurrentState.SCHEDULE_NEW:
-                    commit("setBreadcrumbs", breadcrumbs.CREATE);
-                    break;
-                case CurrentState.SCHEDULE_VIEW:
-                    commit("setBreadcrumbs", breadcrumbs.VIEW);
-                    break;
-                case CurrentState.SCHEDULE_EDIT:
-                    commit("setBreadcrumbs", breadcrumbs.EDIT);
-                    break;
-                case CurrentState.AUTH:
-                    commit("setBreadcrumbs", breadcrumbs.AUTH);
-                    break;
-                default:
-                    commit("setBreadcrumbs", breadcrumbs.MAIN);
+
+        state: {
+            university: {
+                faculties: [],
+                speciality: [],
+                sub_faculty: [],
+                days: [],
+                pairs: [],
+                levels: levels,
+                seasons: seasons,
+                academic_year: currentYear,
+                schedule_types: schedule_types
+            },
+            editingSchedule: {
+                selected_faculty: null,
+                selected_speciality: null,
+                selected_sub_faculty: null,
+                selected_level: 1,
+                selected_study_year: 1,
+                selected_season: 1,
+                selected_academic_year: currentYear,
+                notes: "",
+                schedule_type: ScheduleType.IDLE
+            },
+            scheduleInfo: {},
+            scheduleCourses:[],
+            finalSchedules: [],
+            methodistSchedules: [],
+            auth: true,
+            user: methodist_hardcoded,
+            role: Role.METHODIST,
+            currentState: CurrentState.MAIN,
+            breadcrumbs: breadcrumbs,
+            schedule: schedule_hardcoded,
+        },
+        getters: {
+            role: state => state.role,
+            currentState: state => state.currentState,
+            user: state => state.user,
+            breadcrumbs: state => state.breadcrumbs,
+            days: state => state.university.days,
+            pairs: state => state.university.pairs,
+            schedule: state => state.schedule,
+            faculties: state => state.university.faculties,
+            sub_faculty: state => state.university.sub_faculty,
+            speciality: state => state.university.speciality,
+            specialityByFaculty: state => state.specialityByFaculty,
+            levels: state => state.university.levels,
+            seasons: state => state.university.seasons,
+            university: state => state.university,
+            editingSchedule: state => state.editingSchedule,
+            finalSchedules:state=>state.finalSchedules,
+            scheduleInfo:state=>state.scheduleInfo,
+            scheduleCourses:state=>state.scheduleCourses
+        },
+        actions: {
+            changeCurrentState({commit}, currentState) {
+                commit("setCurrentState", currentState);
+            },
+            setCreateType({commit}, createType) {
+                commit("setCreateType", createType);
+            },
+            logout({commit}) {
+                commit("logout");
+            },
+            login({commit}, credentials) {
+                axios
+                    .post("/api/login", credentials)
+                    .then(res => {
+                        commit("login", res.data[0]);
+                        if (res.data[0].role == 'student') {
+                            commit("setUserRole", 'Студент');
+                            commit("setRole", Role.STUDENT);
+                        } else if (res.data[0].role == 'metodist_dec') {
+                            commit("setUserRole", 'Методист');
+                            commit("setRole", Role.METHODIST);
+                        }
+                    })
+                    .catch(error => console.log(error));
+
+            },
+            fetchFaculties({state, commit}) {
+                if (state.university.faculties.length == 0)
+                    axios
+                        .get(`/api/faculty`)
+                        .then(res => {
+                            commit("setFaculties", res.data);
+                        })
+                        .catch(error => console.log(error));
+            },
+            fetchSubFaculties({state, commit}) {
+                if (state.university.sub_faculty.length == 0)
+                    axios
+                        .get(`/api/sub_faculty`)
+                        .then(res => {
+                            commit("setSubFaculties", res.data);
+                        })
+                        .catch(error => console.log(error));
+            },
+            fetchSpeciality({state, commit}) {
+                if (state.university.speciality.length == 0)
+                    axios
+                        .get(`/api/speciality`)
+                        .then(res => {
+                            commit("setSpeciality", res.data);
+                        })
+                        .catch(error => console.log(error));
+            },
+            fetchDays({state, commit}) {
+                if (state.university.days.length == 0)
+                    axios
+                        .get(`/api/days`)
+                        .then(res =>
+                            commit("setDays", res.data))
+                        .catch(error => console.log(error));
+            },
+            fetchPairs({state, commit}) {
+                if (state.university.pairs.length == 0)
+                    axios
+                        .get(`/api/pairs`)
+                        .then(res =>
+                            commit("setPairs", res.data))
+                        .catch(error => console.log(error));
+            },
+            fetchUserCourses({state, commit}) {
+                axios
+                    .get(`/api/user/` + state.user.code + `/courses`)
+                    .then(res => {
+                        commit("setUserData", res.data);
+                    })
+                    .catch(error => console.log(error));
+            },
+            fetchFinalSchedules({state,commit}, data) {
+                if(state.finalSchedules.length==0)
+                axios
+                    .get(`/api/schedules`, {params: {year: data.year, season: data.season}})
+                    .then(res =>{
+                        console.log(res.data);
+                        commit("setFinalSchedules", res.data)})
+                    .catch(error =>
+                        console.log(error));
+            },
+            fetchMethodistSchedules({state, commit}, data) {
+                if(state.methodistSchedules.length==0)
+                axios
+                    .get(`/api/methodist/schedules`, {
+                        params: {
+                            year: data.year,
+                            season: data.season,
+                            faculty_id: state.user.methodist.faculty_id
+                        }
+                    })
+                    .then(res =>
+                        commit("setMethodistSchedules", res.data))
+                    .catch(error =>
+                        console.log(error));
+            },
+            fetchScheduleInfo({commit},code){
+                axios
+                    .get(`/api/schedule/`+code)
+                    .then(res =>
+                        commit("setScheduleInfo", res.data))
+                    .catch(error =>
+                        console.log(error));
+            },
+            selectSpecialityByFaculty({state}, data) {
+                return state.university.speciality.filter(s => (s.faculty_id == data.faculty_id && s.level == data.level));
+            },
+            selectSubFacultyByFaculty({state}, data) {
+                return state.university.sub_faculty.filter(s => (s.faculty_id == data.faculty_id && s.level == data.level));
+            },
+            editSchedule({commit}, data) {
+                axios
+                    .post(`/api/schedule/edit` + data.id, data)
+                    .then(res => {
+                        commit("editSchedule", res.data);
+                    })
+                    .catch(error => console.log(error));
+            },
+            createSchedule({commit}, data) {
+                axios
+                    .post(`/api/schedule/new`, data)
+                    .then(res => {
+                        commit("addSchedule", res.data);
+                    })
+                    .catch(error => console.log(error));
             }
         },
-        setCreateType({commit}, createType) {
-            commit("setCreateType", createType);
-        },
-        logout({state, commit}) {
-            commit("logout");
-            if (
-                state.currentState == CurrentState.STUDENT_PROFILE ||
-                state.currentState == CurrentState.SCHEDULE_EDIT ||
-                state.currentState == CurrentState.SCHEDULE_CREATE
-            )
-                commit("setCurrentState", CurrentState.MAIN);
-        },
-        login({commit}, credentials) {
-            console.log(credentials);
-            axios
-                .get("/api/user")
-                .then(res => {
-                    commit("login", res.data);
-                    commit("setCurrentState", CurrentState.MAIN);
-                })
-                .catch(error => console.log(error));
-        },
-        fetchFaculties({state, commit}) {
-            if (state.faculties.length == 0)
-                axios
-                    .get(`/api/faculty`)
-                    .then(res => {
-                        commit("setFaculties", res.data);
-                    })
-                    .catch(error => console.log(error));
-        },
-        fetchSubfaculties({state, commit}) {
-            if (state.subfaculty.length == 0)
-                axios
-                    .get(`/api/subfaculty`)
-                    .then(res => {
-                        commit("setSubfaculties", res.data);
-                    })
-                    .catch(error => console.log(error));
-        },
-        fetchSpeciality({state, commit}) {
-            if (state.speciality.length == 0)
-                axios
-                    .get(`/api/speciality`)
-                    .then(res => {
-                        commit("setSpeciality", res.data);
-                    })
-                    .catch(error => console.log(error));
-        },
-        fetchDays({state, commit}) {
-            if (state.days.length == 0)
-                axios
-                    .get(`/api/days`)
-                    .then(res => {
-                        console.log(res.data);
-                        commit("setDays", res.data);
-                    })
-                    .catch(error => console.log(error));
-        },
-        fetchPairs({state, commit}) {
-            if (state.pairs.length == 0)
-                axios
-                    .get(`/api/pairs`)
-                    .then(res => {
-                        console.log("Pairs" + res.data);
-                        commit("setPairs", res.data);
-                    })
-                    .catch(error => console.log(error));
-        },
-        fetchUserCourses({state, commit}) {
-            axios
-                .get(`/api/user/` + state.user.code + `/courses`)
-                .then(res => {
-                    commit("setUserData", res.data);
-                })
-                .catch(error => console.log(error));
+        mutations: {
+            setFaculties(state, data) {
+                state.university.faculties=[];
+                data.forEach(d => state.university.faculties.push(d));
+            },
+            setSubFaculties(state, data) {
+                state.university.sub_faculty=[];
+                data.forEach(d => state.university.sub_faculty.push(d));
+            },
+            setSpeciality(state, data) {
+                state.university.speciality=[];
+                data.forEach(d => state.university.speciality.push(d));
+            },
+            setDays(state, data) {
+                state.university.days=[];
+                data.forEach(d => state.university.days.push(d));
+            },
+            setPairs(state, data) {
+                state.university.pairs=[];
+                data.forEach(d => state.university.pairs.push(d));
+            },
+            setCurrentState(state, currentState) {
+                state.currentState = currentState;
+            },
+            setCreateType(state, createType) {
+                state.editingSchedule.schedule_type = createType;
+            },
+            setFinalSchedules(state, data) {
+                state.university.finalSchedules=[];
+                data.forEach(d => state.finalSchedules.push(d));
+            },
+            setMethodistSchedules(state, data) {
+                state.university.methodistSchedules=[];
+                data.forEach(d => state.methodistSchedules.push(d));
+            },
+            setScheduleInfo(state,data){
+                state.scheduleInfo=data.schedule;
+                state.scheduleCourses=data.courses;
+                console.log(state.scheduleInfo);
+                console.log(state.scheduleCourses);
+            },
+            setUserData(state, data) {
+                state.user.courses = data.course_data;
+                state.user.schedule = data.course_schedule;
+            },
+            setUserRole(state, role) {
+                state.user.role = role;
+            },
+            setRole(state, role) {
+                state.role = role;
+            },
+            logout(state) {
+                state.user = {};
+                state.role = Role.GUEST;
+            },
+            login(state, data) {
+                state.user = data;
+            }
         }
-    },
-    mutations: {
-        setFaculties(state, data) {
-            data.forEach(d => state.faculties.push(d));
-        },
-        setSubfaculties(state, data) {
-            if (state.subfaculty.length == 0)
-                data.forEach(d => state.subfaculty.push(d));
-        },
-        setSpeciality(state, data) {
-            data.forEach(d => state.speciality.push(d));
-        },
-        setDays(state, data) {
-            data.forEach(d => state.days.push(d));
-        },
-        setPairs(state, data) {
-            data.forEach(d => state.pairs.push(d));
-        },
-        setCurrentState(state, currentState) {
-            state.currentState = currentState;
-        },
-        setCreateType(state, createType) {
-            state.createType = createType;
-        },
-        setBreadcrumbs(state, breadcrumbs) {
-            state.breadcrumbs = breadcrumbs;
-        },
-        setUserData(state, data) {
-            state.user.courses = data.course_data;
-            state.user.schedule = data.course_schedule;
-            console.log(state.user);
-        },
-        logout(state) {
-            state.user = {};
-            state.role = Role.GUEST;
-        },
-        login(state, data) {
-            console.log(data);
-            state.user = user_hardcoded;
-            //TODO
-            state.role = Role.METODIST;
-        }
-    }
-});
+    })
+;
 export default store;

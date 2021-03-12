@@ -16,9 +16,10 @@ export default {
   mounted() {
     this.$store.dispatch("fetchFaculties");
     this.$store.dispatch("fetchSpeciality");
-    this.$store.dispatch("fetchSubfaculties");
+    this.$store.dispatch("fetchSubFaculties");
     this.$store.dispatch("fetchDays");
     this.$store.dispatch("fetchPairs");
+
   }
 };
 </script>
