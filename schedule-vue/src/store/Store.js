@@ -116,6 +116,8 @@ const store = new Store({
 
         state: {
             university: {
+                current_year:2020,
+                current_season:2,
                 faculties: [],
                 speciality: [],
                 sub_faculty: [],
@@ -165,6 +167,7 @@ const store = new Store({
             university: state => state.university,
             editingSchedule: state => state.editingSchedule,
             finalSchedules:state=>state.finalSchedules,
+            methodistSchedules:state=>state.methodistSchedules,
             scheduleInfo:state=>state.scheduleInfo,
             scheduleCourses:state=>state.scheduleCourses
         },
@@ -245,23 +248,24 @@ const store = new Store({
                     })
                     .catch(error => console.log(error));
             },
-            fetchFinalSchedules({state,commit}, data) {
+            fetchFinalSchedules({state,commit}) {
                 if(state.finalSchedules.length==0)
                 axios
-                    .get(`/api/schedules`, {params: {year: data.year, season: data.season}})
+                    .get(`/api/schedules`, {params: { year: state.university.current_year,
+                            season: state.university.current_season}})
                     .then(res =>{
                         console.log(res.data);
                         commit("setFinalSchedules", res.data)})
                     .catch(error =>
                         console.log(error));
             },
-            fetchMethodistSchedules({state, commit}, data) {
+            fetchMethodistSchedules({state, commit}) {
                 if(state.methodistSchedules.length==0)
                 axios
                     .get(`/api/methodist/schedules`, {
                         params: {
-                            year: data.year,
-                            season: data.season,
+                            year: state.university.current_year,
+                            season: state.university.current_season,
                             faculty_id: state.user.methodist.faculty_id
                         }
                     })
@@ -329,12 +333,13 @@ const store = new Store({
                 state.editingSchedule.schedule_type = createType;
             },
             setFinalSchedules(state, data) {
-                state.university.finalSchedules=[];
+                state.finalSchedules=[];
                 data.forEach(d => state.finalSchedules.push(d));
             },
             setMethodistSchedules(state, data) {
-                state.university.methodistSchedules=[];
+                state.methodistSchedules=[];
                 data.forEach(d => state.methodistSchedules.push(d));
+                console.log(state.methodistSchedules);
             },
             setScheduleInfo(state,data){
                 state.scheduleInfo=data.schedule;

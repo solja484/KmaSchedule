@@ -5,7 +5,7 @@
     <UserInfo></UserInfo>
     <Title v-if="role==student" message="Розклад" additional="" class="text-center"></Title>
     <StudentSchedule v-if="role==student"></StudentSchedule>
-    <MetodistList v-if="role==methodist"></MetodistList>
+    <MethodistList v-if="role==methodist"></MethodistList>
     <Footer></Footer>
   </div>
 </template>
@@ -18,11 +18,11 @@ import Breadcrumbs from "../components/Basic/Breadcrumbs";
 import StudentSchedule from "../components/Table/StudentSchedule";
 import Title from "../components/Nested/Title";
 import {Role} from "../models/entities/Role";
-import MetodistList from "../components/Basic/MetodistList";
+import MethodistList from "../components/Basic/MethodistList";
 
 export default {
   name: "Profile",
-  components: {MetodistList, Header, Breadcrumbs, StudentSchedule, UserInfo, Title, Footer },
+  components: {MethodistList, Header, Breadcrumbs, StudentSchedule, UserInfo, Title, Footer },
   data(){
     return {
     role:this.$store.getters['role'] ,

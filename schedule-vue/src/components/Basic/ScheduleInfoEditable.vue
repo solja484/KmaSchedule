@@ -8,10 +8,8 @@
         <div class="container mx-5">
             <div class="row">
                 <strong class="col-sm-2 text-right text-14">Факультет</strong>
-                <b-form-select v-model="selected_faculty" class="col-sm-4 text-14 mb-1" size="sm">
-                    <b-form-select-option :value="null">Не обрано</b-form-select-option>
-                    <b-form-select-option v-for="f in university.faculties" :key="f.id" :value="f.id" class="text-14">
-                        {{f.name}}
+                <b-form-select v-model="selected_faculty" class="col-sm-4 text-14 mb-1" size="sm" disabled>
+                    <b-form-select-option :value="methodist.faculty_id">{{methodist.faculty_name}}
                     </b-form-select-option>
                 </b-form-select>
             </div>
@@ -26,19 +24,28 @@
                     ></b-form-radio-group>
                 </b-form-group>
             </div>
-            <div class="row ">
+            <div class="row " v-if="schedule_type!=sub_faculty_type">
                 <strong class="col-sm-2 text-right text-14">Спеціальність</strong>
-                <b-form-select v-model="selected_speciality" class="col-sm-4 text-14 mb-1" size="sm"
-                               :disabled="selected_faculty==null">
+                <b-form-select v-model="selected_speciality" class="col-sm-4 text-14 mb-1" size="sm">
                     <b-form-select-option :value="null">Не обрано</b-form-select-option>
-                    <b-form-select-option v-for="s in speciality" :key="s.id" :value="s.id" class="text-14">
+                    <b-form-select-option v-for="s in specialityFiltered" :key="s.id" :value="s.id" class="text-14">
                         {{s.name}}
                     </b-form-select-option>
                 </b-form-select>
                 <div class=" col-sm-6"></div>
             </div>
-            <div class="row ">
-                <strong class="col-sm-2 text-right text-14">Рік навчання</strong>
+            <div class="row " v-else-if="schedule_type==sub_faculty_type">
+                <strong class="col-sm-2 text-right text-14">Кафедра</strong>
+                <b-form-select v-model="selected_sub_faculty" class="col-sm-4 text-14 mb-1" size="sm">
+                    <b-form-select-option :value="null">Не обрано</b-form-select-option>
+                    <b-form-select-option v-for="s in subfacultyFiltered" :key="s.id" :value="s.id" class="text-14">
+                        {{s.name}}
+                    </b-form-select-option>
+                </b-form-select>
+                <div class=" col-sm-6"></div>
+            </div>
+            <div class="row" v-if="schedule_type!=sub_faculty_type">
+                <strong class="col-sm-2 text-right text-14"  >Рік навчання</strong>
                 <b-form-select v-model="selected_study_year" class="col-sm-1 text-14 mb-1" size="sm"
                                :disabled="selected_speciality==null">
                     <b-form-select-option v-for="l in yearsByLevel" :key="l.course" :value="l.year" class="text-14">
@@ -46,8 +53,8 @@
                     </b-form-select-option>
                 </b-form-select>
             </div>
-            <div class="row ">
-                <strong class="col-sm-2 text-right text-14">Триместр</strong>
+            <div class="row vertical-middle">
+                <strong class="col-sm-2 text-right text-14 vertical-middle">Триместр</strong>
                 <b-form-select v-model="selected_season" class="col-sm-1 text-14 mb-1" size="sm">
                     <b-form-select-option v-for="s in university.seasons" :key="s.number" :value="s.number"
                                           class="text-14">
@@ -71,7 +78,7 @@
                 <b-form-input class="col-sm-4 t text-14" maxlength="100"></b-form-input>
             </div>
         </div>
-
+        <EmptySchedule></EmptySchedule>
     </div>
 </template>
 
@@ -80,16 +87,18 @@
     import {CurrentState} from "../../models/entities/CurrentState";
     import {ScheduleType} from "../../models/entities/ScheduleType"
     import {BFormSelect, BFormSelectOption, BFormGroup, BFormRadioGroup, BFormInput} from "bootstrap-vue";
+    import EmptySchedule from "../Table/EmptySchedule";
 
     export default {
         name: "ScheduleInfoEdit",
-        components: {Title, BFormSelect, BFormSelectOption, BFormGroup, BFormRadioGroup, BFormInput},
+        components: {EmptySchedule, Title, BFormSelect, BFormSelectOption, BFormGroup, BFormRadioGroup, BFormInput},
         data() {
             return {
                 currentState: this.$store.getters['currentState'],
                 createState: CurrentState.SCHEDULE_CREATE,
                 editState: CurrentState.SCHEDULE_EDIT,
                 university: this.$store.getters['university'],
+                methodist: this.$store.getters['user'].methodist,
                 sub_faculty: [],
                 speciality: [],
                 level_options: [
@@ -97,7 +106,7 @@
                     {text: 'Магістерська', value: 2}
                 ],
                 yearsByLevel: this.$store.getters['university'].levels.filter(l => l.level == 1),
-                selected_faculty: this.$store.getters['editingSchedule'].selected_faculty,
+                selected_faculty: this.$store.getters['user'].methodist.faculty_id,
                 selected_speciality: this.$store.getters['editingSchedule'].selected_speciality,
                 selected_sub_faculty: this.$store.getters['editingSchedule'].selected_sub_faculty,
                 selected_study_year: this.$store.getters['editingSchedule'].selected_study_year,
@@ -105,47 +114,34 @@
                 selected_academic_year: this.$store.getters['editingSchedule'].selected_academic_year,
                 notes: this.$store.getters['editingSchedule'].notes,
                 selected_level: this.$store.getters['editingSchedule'].selected_level,
-                schedule_type: this.$store.getters['editingSchedule'].schedule_type
+                schedule_type: this.$store.getters['editingSchedule'].schedule_type,
+                sub_faculty_type: ScheduleType.SUBFACULTY
             }
         },
         computed: {
             next_academic_year: function () {
                 return this.university.academic_year + 1
             },
+            subfacultyFiltered: function () {
+                if (this.schedule_type == this.sub_faculty_type)
+                    return this.university.sub_faculty.filter(s =>
+                        (s.faculty_id == this.selected_faculty));
+                return [];
+            },
+            specialityFiltered: function () {
+                if (this.schedule_type != this.sub_faculty_type)
+                    return this.university.speciality.filter(s =>
+                        (s.faculty_id == this.selected_faculty && s.level == this.selected_level));
+                return [];
+            }
         },
         watch: {
-            selected_faculty: function () {
-                if (this.selected_faculty != null) {
-                    const data = {
-                        "faculty_id": this
-                            .selected_faculty,
-                        "level": this
-                            .selected_level
-                    };
-                    if (this.schedule_type == ScheduleType.SUBFACULTY)
-                        this.$store.dispatch('selectSubFacultyByFaculty', data).then((res) => {
-                            this.sub_faculty = res;
-                        });
-                    else
-                        this.$store.dispatch('selectSpecialityByFaculty', data).then((res) => {
-                            this.speciality = res;
-                        });
-                }
-            },
             selected_level: function () {
-                if (this.selected_faculty != null) {
-                    const data = {
-                        "faculty_id": this
-                            .selected_faculty,
-                        "level": this
-                            .selected_level
-                    };
-                    this.$store.dispatch('selectSpecialityByFaculty', data).then(() => {
-                        this.specialityByFaculty = this.$store.getters['specialityByFaculty'];
-                        this.yearsByLevel = this.$store.getters['levels'].filter(l => l.level == this.selected_level);
-                        this.selected_speciality = null;
-                    });
-                }
+                this.specialityFiltered;
+                this.yearsByLevel = this.$store.getters['levels'].filter(l => l.level == this.selected_level);
+                this.selected_speciality = null;
+                this.selected_sub_faculty = null;
+
             }
         },
         methods: {
@@ -177,8 +173,11 @@
     .text-14 {
         font-size: 14px;
     }
+    .vertical-middle{
+        vertical-align: middle!important;
+    }
 
-   .info-button {
+    .info-button {
         background: $info !important;
         border-color: $info-border !important;
     }

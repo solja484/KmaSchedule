@@ -31,7 +31,7 @@
             </div>
         </div>
         <div class="px-5 mt-3">
-            <ScheduleTable ></ScheduleTable>
+            <ScheduleTable :schedule_type="schedule.schedule_type" ></ScheduleTable>
         </div>
     </div>
 </template>
